@@ -56,3 +56,41 @@ if [[ "$TERM" == screen* ]]; then
     screen_set $tab_title $tab_hardstatus
   }
 fi
+
+function sls() {
+  screen -ls
+}
+
+function ss() {
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: ss <session_name>"
+  else
+    screen -S "$@"
+  fi
+}
+
+function sr() {
+  screen -r "$@"
+}
+
+# prepare autosuggestions for sr
+function _sr() {
+  local state
+
+  _arguments \
+    '1: :->sessions' \
+    '*: :->rest'
+
+  case $state in
+    (sessions)
+      local -a sessions
+      sessions=( ${(f)"$(screen -ls | awk '/\t/ {print $1}' | cut -d. -f2)"} )
+      _describe -t sessions 'sessions' sessions
+    ;;
+    (*)
+      _arguments '*:filename:_files'
+    ;;
+  esac
+}
+
+compdef _sr sr
